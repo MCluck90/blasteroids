@@ -1,0 +1,3 @@
+
+
+Game.addObject(Player);
