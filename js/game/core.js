@@ -11,6 +11,8 @@ var Game = (function($, undefined) {
     // Dimensions of the canvas
     WIDTH = canvas.width,
     HEIGHT = canvas.height,
+    TOP = $(canvas).offset().top,
+    LEFT = $(canvas).offset().left,
 
     // Drawing context, used for rendering stuff to the canvas
     context = canvas.getContext('2d'),
@@ -23,6 +25,15 @@ var Game = (function($, undefined) {
 
     // Key(s) currently pressed down
     keysPressed = {},
+
+    // If the mouse is currently pressed
+    mousePressed = false,
+
+    // Current position of the mouse
+    mousePosition = {
+        x: 0,
+        y: 0
+    },
 
     // Color for clearing the canvas on each re-draw
     CLEAR_COLOR = '#000',
@@ -61,8 +72,23 @@ var Game = (function($, undefined) {
     $(document).keydown(function(e) {
         keysPressed[e.which] = true;
     });
+
     $(document).keyup(function(e) {
         keysPressed[e.which] = undefined;
+    });
+
+    // Capture the mouse events
+    $(document).mousedown(function() {
+        mousePressed = true;
+    });
+
+    $(document).mouseup(function() {
+        mousePressed = false;
+    });
+
+    $(document).mousemove(function(e) {
+        mousePosition.x = e.clientX - LEFT;
+        mousePosition.y = e.clientY - TOP;
     });
 
     // Initialize the game
@@ -110,6 +136,22 @@ var Game = (function($, undefined) {
          */
         isKeyDown: function(keyCode) {
             return keysPressed[keyCode] === true;
+        },
+
+        /**
+         * Returns if the mouse is currently pressed
+         * @return {Boolean}
+         */
+        isMousePressed: function() {
+            return mousePressed;
+        },
+
+        /**
+         * Returns the current position of the mouse
+         * @return {Object}
+         */
+        getMousePosition: function() {
+            return mousePosition;
         }
     }
 
