@@ -14,7 +14,7 @@ var Player = (function(Game, undefined) {
     SPEED = 100,
 
     // Time in which laser is active (in milliseconds)
-    ACTIVE_LASER_TIME = 1000,
+    ACTIVE_LASER_TIME = 500,
 
     // Cooldown time on the laser
     laserCooldown = 0,
@@ -40,7 +40,7 @@ var Player = (function(Game, undefined) {
      * @param {CanvasRenderingContext2D} context
      */
     _player.draw = function(context) {
-        if (laserActive) {
+        if (laserActive && laserCooldown > ACTIVE_LASER_TIME / 2) {
             var mousePosition = Game.getMousePosition(),
                 playerX = _player.x + (_player.size.width / 2),
                 playerY = _player.y + (_player.size.height / 2),
@@ -67,15 +67,13 @@ var Player = (function(Game, undefined) {
             COLOR = "#1D1";
         }
 
-        // Figure out if the player is allowed to use the laser
-        laserCooldown = laserCooldown - delta;
-        if (laserCooldown < 0) {
-            laserCooldown = 0;
-            laserActive = false;
-        }
-
         // Adjust movement based on amount of time passed
         var change = SPEED * delta;
+
+        laserCooldown -= delta * 1000;
+        if (laserCooldown < 0) {
+            laserCooldown = 0;
+        }
 
         // Move the player is a movement key is pressed
         if (Game.isKeyDown(KEYS.UP) || Game.isKeyDown(KEYS.W)) {
@@ -91,14 +89,12 @@ var Player = (function(Game, undefined) {
         }
 
         if (Game.isMousePressed()) {
-            // Check if we can activate the laser
-            if (!laserActive && laserCooldown == 0) {
-                laserCooldown = ACTIVE_LASER_TIME;
+            if (laserCooldown <= 0) {
                 laserActive = true;
+                laserCooldown = ACTIVE_LASER_TIME;
             }
         } else {
             laserActive = false;
-            laserCooldown = 0;
         }
     };
 
