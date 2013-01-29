@@ -7,17 +7,32 @@ var Player = (function(Game, undefined) {
     // Color to draw the player as
     COLOR = "#1D1",
 
+    // Color of the laser
+    LASER_COLOR = "#00F",
+
     // Speed at which the character moves
-    SPEED = 10,
+    SPEED = 100,
+
+    // Time in which laser is active (in milliseconds)
+    ACTIVE_LASER_TIME = 1000,
+
+    // Cooldown time on the laser
+    laserCooldown = 0,
+
+    // If true, laser is being fired
+    laserActive = false,
 
     // The actual object being passed back
     _player = new GameObject();
 
     // Initialize the players' size
     _player.size = {
-        width: 50,
-        height: 50
+        width: 20,
+        height: 20
     };
+
+    _player.x = 300;
+    _player.y = 200;
 
     /**
      * Define how the player is actually drawn
@@ -25,6 +40,19 @@ var Player = (function(Game, undefined) {
      * @param {CanvasRenderingContext2D} context
      */
     _player.draw = function(context) {
+        if (laserActive) {
+            var mousePosition = Game.getMousePosition(),
+                playerX = _player.x + (_player.size.width / 2),
+                playerY = _player.y + (_player.size.height / 2),
+                vector = normalize(mousePosition.x - playerX, mousePosition.y - playerY);
+
+            context.beginPath();
+            context.strokeStyle = LASER_COLOR;
+            context.moveTo(playerX, playerY);
+            context.lineTo(vector.x * 100000, vector.y * 100000);
+            context.stroke();
+        }
+
         context.fillStyle = COLOR;
         context.fillRect(_player.x, _player.y, _player.size.width, _player.size.height);
     };
@@ -33,6 +61,13 @@ var Player = (function(Game, undefined) {
      * Define how the player moves
      */
     _player.update = function(delta) {
+        // Figure out if the player is allowed to use the laser
+        laserCooldown = laserCooldown - delta;
+        if (laserCooldown < 0) {
+            laserCooldown = 0;
+            laserActive = false;
+        }
+
         // Adjust movement based on amount of time passed
         var change = SPEED * delta;
 
@@ -50,21 +85,14 @@ var Player = (function(Game, undefined) {
         }
 
         if (Game.isMousePressed()) {
-            // Move the player towards the mouse
-            var mousePosition = Game.getMousePosition(),
-                x = mousePosition.x - _player.x - (_player.size.width / 2),
-                y = mousePosition.y - _player.y - (_player.size.height / 2),
-                vLength = Math.sqrt((x * x) + (y * y));
-
-            if (Math.abs(x) > 2) {
-                x /= vLength;
-                _player.x += x * change;
+            // Check if we can activate the laser
+            if (!laserActive && laserCooldown == 0) {
+                laserCooldown = ACTIVE_LASER_TIME;
+                laserActive = true;
             }
-
-            if (Math.abs(y) > 2) {
-                y /= vLength;
-                _player.y += y * change;
-            }
+        } else {
+            laserActive = false;
+            laserCooldown = 0;
         }
     };
 

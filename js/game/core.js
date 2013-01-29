@@ -42,11 +42,11 @@ var Game = (function($, undefined) {
     gameTime = new Date(),
 
     // Frames per second
-    FPS = 24;
+    FPS = 40;
 
     // Update all of the objects
     function update() {
-        var delta = (new Date() - gameTime) / 100;
+        var delta = (new Date() - gameTime) / 1000;
         for (var id in gameObjects) {
             if (gameObjects.hasOwnProperty(id)) {
                 gameObjects[id].update(delta);
@@ -88,7 +88,7 @@ var Game = (function($, undefined) {
 
     $(document).mousemove(function(e) {
         mousePosition.x = e.clientX - LEFT;
-        mousePosition.y = e.clientY - TOP;
+        mousePosition.y = e.clientY - TOP + $(window).scrollTop();
     });
 
     // Initialize the game
@@ -152,6 +152,15 @@ var Game = (function($, undefined) {
          */
         getMousePosition: function() {
             return mousePosition;
+        },
+
+        /**
+         * Returns the size of the canvas
+         *
+         * @return {Object}
+         */
+        getCanvasSize: function() {
+            return { x: WIDTH, y: HEIGHT };
         }
     }
 
