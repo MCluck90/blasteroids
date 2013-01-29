@@ -43,23 +43,12 @@ var QuadTree = (function(undefined) {
          */
         this.getQuadrant = function(obj) {
             var halfWidth = self.width / 2,
-                halfHeight = self.height / 2;
+                halfHeight = self.height / 2,
+                quadrant = 0;
 
-            if (obj.x < halfWidth) {
-                // It's in the 1st or 4th quadrant
-                if (obj.y < halfHeight) {
-                    return 0;
-                } else {
-                    return 3;
-                }
-            } else {
-                // It's in the 2nd or 3rd quadrant
-                if (obj.y < halfHeight) {
-                    return 1;
-                } else {
-                    return 2;
-                }
-            }
+            quadrant += obj.x > halfWidth * 1;
+            quadrant += obj.y > halfHeight * 2;
+            return quadrant;
         };
 
         /**
@@ -86,7 +75,7 @@ var QuadTree = (function(undefined) {
             // If this node has an objects property, it's a leaf
             if (self.objects !== undefined) {
                 for (var i = 0, len = self.objects.length; i < len; i++) {
-                    if (self.objects[i]._id == obj._id) {
+                    if (self.objects[i]._id === obj._id) {
                         self.objects.splice(i, 1);
                         break;
                     }

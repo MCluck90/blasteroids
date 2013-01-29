@@ -48,7 +48,7 @@ var Game = (function($, undefined) {
     function update() {
         var delta = (new Date() - gameTime) / 1000;
         for (var id in gameObjects) {
-            if (gameObjects.hasOwnProperty(id)) {
+            if (gameObjects.hasOwnProperty(id) && gameObjects[id] instanceof GameObject) {
                 var obj = gameObjects[id],
                     mock = {
                         _id: id,
@@ -70,7 +70,7 @@ var Game = (function($, undefined) {
         context.fillRect(0, 0, WIDTH, HEIGHT);
 
         for (var id in gameObjects) {
-            if (gameObjects.hasOwnProperty(id)) {
+            if (gameObjects.hasOwnProperty(id) && gameObjects[id] instanceof GameObject) {
                 gameObjects[id].draw(context);
             }
         }
@@ -137,6 +137,7 @@ var Game = (function($, undefined) {
             }
 
             gameObjects['' + obj._id] = undefined;
+            QuadTree.remove(obj);
         },
 
         /**

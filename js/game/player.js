@@ -10,11 +10,14 @@ var Player = (function(Game, undefined) {
     // Color of the laser
     LASER_COLOR = "#00F",
 
+    // Size of the canvas
+    CANVAS_SIZE = Game.getCanvasSize(),
+
     // Speed at which the character moves
     SPEED = 100,
 
     // Time in which laser is active (in milliseconds)
-    ACTIVE_LASER_TIME = 500,
+    ACTIVE_LASER_TIME = 420,
 
     // Cooldown time on the laser
     laserCooldown = 0,
@@ -33,6 +36,48 @@ var Player = (function(Game, undefined) {
 
     _player.x = 300;
     _player.y = 200;
+
+    /**
+     * Resets the player
+     */
+    function restart() {
+        _player.x = 300;
+        _player.y = 200;
+    }
+
+    /**
+     * Handles laser collision
+     *
+     * @param {Object} vector Normalized vector representing laser direction
+     */
+    function laserCollsion(vector) {
+        var laserX = _player.x + ((_player.size.width / 2) * Math.sign(vector.x)),
+            laserY = _player.y + ((_player.size.height / 2) * Math.sign(vector.y)),
+            collisions = [],
+            collider = new GameObject();
+
+        collider._id = null;
+        collider.size = {
+            width: 2,
+            height: 2
+        };
+
+        while ( (laserX > 0 && laserX < CANVAS_SIZE.x) && (laserY > 0 && laserY < CANVAS_SIZE.y) ) {
+            collider.x = laserX;
+            collider.y = laserY;
+
+            collisions = QuadTree.getCollisions(collider);
+
+            if (collisions.length > 0) {
+                return collisions;
+            }
+
+            laserX += vector.x * 5;
+            laserY += vector.y * 5;
+        }
+
+        return false;
+    }
 
     /**
      * Define how the player is actually drawn
@@ -62,9 +107,22 @@ var Player = (function(Game, undefined) {
      */
     _player.update = function(delta) {
         if (QuadTree.getCollisions(_player).length > 0) {
-            COLOR = "#D1D";
-        } else {
-            COLOR = "#1D1";
+            restart();
+        }
+
+        if (laserActive && laserCooldown > ACTIVE_LASER_TIME / 2) {
+            var mousePosition = Game.getMousePosition(),
+                playerX = _player.x + (_player.size.width / 2),
+                playerY = _player.y + (_player.size.height / 2),
+                vector = normalize(mousePosition.x - playerX, mousePosition.y - playerY);
+            var collision = laserCollsion(vector);
+            if (collision) {
+                for (var i = 0, len = collision.length; i < len; i++) {
+                    if (collision[i] !== _player) {
+                        Game.removeObject(collision[i]);
+                    }
+                }
+            }
         }
 
         // Adjust movement based on amount of time passed
@@ -95,6 +153,7 @@ var Player = (function(Game, undefined) {
             }
         } else {
             laserActive = false;
+            laserCooldown = 0;
         }
     };
 
