@@ -45,21 +45,23 @@ var Player = (function(Game, undefined) {
         _player.y = 200;
     }
 
+    var tempContext;
+
     /**
      * Handles laser collision
      *
      * @param {Object} vector Normalized vector representing laser direction
      */
     function laserCollsion(vector) {
-        var laserX = _player.x + ((_player.size.width / 2) * Math.sign(vector.x)),
-            laserY = _player.y + ((_player.size.height / 2) * Math.sign(vector.y)),
+        var laserX = _player.x + ((_player.size.width / 4)),
+            laserY = _player.y + ((_player.size.height / 4)),
             collisions = [],
             collider = new GameObject();
 
         collider._id = null;
         collider.size = {
-            width: 2,
-            height: 2
+            width: 10,
+            height: 10
         };
 
         while ( (laserX > 0 && laserX < CANVAS_SIZE.x) && (laserY > 0 && laserY < CANVAS_SIZE.y) ) {
@@ -69,7 +71,11 @@ var Player = (function(Game, undefined) {
             collisions = QuadTree.getCollisions(collider);
 
             if (collisions.length > 0) {
-                return collisions;
+                for (var i = 0, len = collisions.length; i < len; i++) {
+                    if (collisions[i] !== _player) {
+                        return collisions[i];
+                    }
+                }
             }
 
             laserX += vector.x * 5;
@@ -85,7 +91,8 @@ var Player = (function(Game, undefined) {
      * @param {CanvasRenderingContext2D} context
      */
     _player.draw = function(context) {
-        if (laserActive && laserCooldown > ACTIVE_LASER_TIME / 2) {
+        tempContext = context;
+        if (laserActive && laserCooldown > ACTIVE_LASER_TIME * 0.9) {
             var mousePosition = Game.getMousePosition(),
                 playerX = _player.x + (_player.size.width / 2),
                 playerY = _player.y + (_player.size.height / 2),
@@ -110,18 +117,16 @@ var Player = (function(Game, undefined) {
             restart();
         }
 
-        if (laserActive && laserCooldown > ACTIVE_LASER_TIME / 2) {
+        // Find out if the player shot an enemy
+        if (laserActive && laserCooldown == ACTIVE_LASER_TIME) {
             var mousePosition = Game.getMousePosition(),
                 playerX = _player.x + (_player.size.width / 2),
                 playerY = _player.y + (_player.size.height / 2),
-                vector = normalize(mousePosition.x - playerX, mousePosition.y - playerY);
-            var collision = laserCollsion(vector);
+                vector = normalize(mousePosition.x - playerX, mousePosition.y - playerY),
+                collision = laserCollsion(vector);
+
             if (collision) {
-                for (var i = 0, len = collision.length; i < len; i++) {
-                    if (collision[i] !== _player) {
-                        Game.removeObject(collision[i]);
-                    }
-                }
+                Game.removeObject(collision);
             }
         }
 

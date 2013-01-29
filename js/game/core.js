@@ -46,6 +46,9 @@ var Game = (function($, undefined) {
 
     // Update all of the objects
     function update() {
+        if (paused)
+            return;
+
         var delta = (new Date() - gameTime) / 1000;
         for (var id in gameObjects) {
             if (gameObjects.hasOwnProperty(id) && gameObjects[id] instanceof GameObject) {
@@ -64,8 +67,13 @@ var Game = (function($, undefined) {
         gameTime = new Date();
     }
 
+    var paused = false;
+
     // Draw all of the objects
     function draw() {
+        if (paused)
+            return;
+
         context.fillStyle = CLEAR_COLOR;
         context.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -173,6 +181,10 @@ var Game = (function($, undefined) {
          */
         getCanvasSize: function() {
             return { x: WIDTH, y: HEIGHT };
+        },
+
+        pause: function() {
+            paused = !paused;
         }
     }
 
