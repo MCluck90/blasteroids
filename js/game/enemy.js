@@ -7,7 +7,7 @@ var Enemy = (function(Game, undefined) {
     MIN_SPEED = 50,
 
     // Maximum possible speed
-    MAX_SPEED = 300,
+    MAX_SPEED = 250,
 
     // Color of the enemy
     COLOR = "#F00";

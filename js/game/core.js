@@ -42,7 +42,10 @@ var Game = (function($, undefined) {
     gameTime = new Date(),
 
     // Frames per second
-    FPS = 40;
+    FPS = 40,
+
+    // The actual game loop
+    gameLoop;
 
     // Update all of the objects
     function update() {
@@ -107,14 +110,24 @@ var Game = (function($, undefined) {
         mousePosition.y = e.clientY - TOP + $(window).scrollTop();
     });
 
-    // Initialize the game
-    QuadTree.init(WIDTH, HEIGHT);
-    setInterval(function() {
-        update();
-        draw();
-    }, 1000 / FPS);
-
     return {
+        /**
+         * Initialize the game
+         */
+        init: function() {
+            QuadTree.init(WIDTH, HEIGHT);
+            Game.addObject(new Enemy());
+            Game.addObject(Player);
+            gameLoop = setInterval(function() {
+                update();
+                draw();
+            }, 1000 / FPS);
+        },
+
+        stop: function() {
+            clearInterval(gameLoop);
+        },
+
         /**
          * Add/Set an object in the world
          *

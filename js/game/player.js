@@ -14,7 +14,7 @@ var Player = (function(Game, undefined) {
     CANVAS_SIZE = Game.getCanvasSize(),
 
     // Speed at which the character moves
-    SPEED = 100,
+    SPEED = 150,
 
     // Time in which laser is active (in milliseconds)
     ACTIVE_LASER_TIME = 420,
@@ -24,6 +24,12 @@ var Player = (function(Game, undefined) {
 
     // If true, laser is being fired
     laserActive = false,
+
+    // Defined if the laser connected with an enemy
+    laserEndPoint = undefined,
+
+    // When it hits zero, an extra enemy is added
+    waveCountdown = 15,
 
     // The actual object being passed back
     _player = new GameObject();
@@ -51,6 +57,7 @@ var Player = (function(Game, undefined) {
      * Handles laser collision
      *
      * @param {Object} vector Normalized vector representing laser direction
+     * @return {boolean|GameObject}
      */
     function laserCollsion(vector) {
         var laserX = _player.x + ((_player.size.width / 4)),
@@ -101,7 +108,13 @@ var Player = (function(Game, undefined) {
             context.beginPath();
             context.strokeStyle = LASER_COLOR;
             context.moveTo(playerX, playerY);
-            context.lineTo(vector.x * 100000, vector.y * 100000);
+
+            if (laserEndPoint === undefined) {
+                context.lineTo(vector.x * 100000, vector.y * 100000);
+            } else {
+                context.lineTo(laserEndPoint.x, laserEndPoint.y);
+            }
+
             context.stroke();
         }
 
@@ -126,7 +139,30 @@ var Player = (function(Game, undefined) {
                 collision = laserCollsion(vector);
 
             if (collision) {
+                var mouseVector = normalize(mousePosition.x, mousePosition.y),
+                    laserStartVector = new Vector2D(playerX, playerY),
+                    laserEndVector = new Vector2D(vector.x * 100000, vector.y * 100000),
+                    mouseStartVector = new Vector2D(mousePosition.x, mousePosition.y),
+                    mouseEndVector = new Vector2D(mouseVector.x * 100000, mouseVector.y * 100000),
+                    endPoint = Vector2D.getIntersectPoint(laserStartVector,
+                        laserEndVector,
+                        mouseStartVector,
+                        mouseEndVector);
+
+                laserEndPoint = {
+                    x: endPoint.x,
+                    y: endPoint.y
+                };
+
                 Game.removeObject(collision);
+                Game.addObject(new Enemy());
+
+                // Give a random chance of the wave ending quicker
+                waveCountdown -= (Math.random() >= .5) ? 1 : 2;
+                if (waveCountdown <= 0) {
+                    Game.addObject(new Enemy());
+                    waveCountdown = 15;
+                }
             }
         }
 
@@ -136,6 +172,7 @@ var Player = (function(Game, undefined) {
         laserCooldown -= delta * 1000;
         if (laserCooldown < 0) {
             laserCooldown = 0;
+            laserEndPoint = undefined;
         }
 
         // Move the player is a movement key is pressed
