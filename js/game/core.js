@@ -49,7 +49,15 @@ var Game = (function($, undefined) {
         var delta = (new Date() - gameTime) / 1000;
         for (var id in gameObjects) {
             if (gameObjects.hasOwnProperty(id)) {
+                var obj = gameObjects[id],
+                    mock = {
+                        _id: id,
+                        x: obj.x,
+                        y: obj.y
+                    };
                 gameObjects[id].update(delta);
+                QuadTree.remove(mock);
+                QuadTree.insert(obj);
             }
         }
 
@@ -87,11 +95,12 @@ var Game = (function($, undefined) {
     });
 
     $(document).mousemove(function(e) {
-        mousePosition.x = e.clientX - LEFT;
+        mousePosition.x = e.clientX - LEFT + $(window).scrollLeft();
         mousePosition.y = e.clientY - TOP + $(window).scrollTop();
     });
 
     // Initialize the game
+    QuadTree.init(WIDTH, HEIGHT);
     setInterval(function() {
         update();
         draw();
@@ -111,6 +120,8 @@ var Game = (function($, undefined) {
             }
 
             gameObjects['' + obj._id] = obj;
+
+            QuadTree.insert(obj);
 
             return obj._id;
         },

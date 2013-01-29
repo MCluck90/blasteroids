@@ -4,7 +4,7 @@ var Enemy = (function(Game, undefined) {
     var
 
     // Minimum speed
-    MIN_SPEED = 100,
+    MIN_SPEED = 50,
 
     // Maximum possible speed
     MAX_SPEED = 300,

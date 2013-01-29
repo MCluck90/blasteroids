@@ -61,6 +61,12 @@ var Player = (function(Game, undefined) {
      * Define how the player moves
      */
     _player.update = function(delta) {
+        if (QuadTree.getCollisions(_player).length > 0) {
+            COLOR = "#D1D";
+        } else {
+            COLOR = "#1D1";
+        }
+
         // Figure out if the player is allowed to use the laser
         laserCooldown = laserCooldown - delta;
         if (laserCooldown < 0) {
