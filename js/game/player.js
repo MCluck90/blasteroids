@@ -136,7 +136,7 @@ var Player = (function(Game, undefined) {
 
         if (_player.y > CANVAS_SIZE.y) {
             _player.y = -_player.size.height + 1;
-        } else if (_player.x + _player.size.height < 0) {
+        } else if (_player.y + _player.size.height < 0) {
             _player.y = CANVAS_SIZE.y - 1;
         }
 
