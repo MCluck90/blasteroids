@@ -94,17 +94,24 @@ textarea {
    ========================================================================== */
 
 body {
+    text-align: center;;
     background-color: #2e2e2e;
+    color: #DDD;
+}
+
+a, a:visited {
+    color: #b3d4fc;
+    text-decoration: none;
 }
 
 canvas {
     display: block;
-    margin: 32px auto;
+    margin: 12px auto 32px auto;
 }
 
-
-
-
+#controls {
+    margin-top: 12px;
+}
 
 
 

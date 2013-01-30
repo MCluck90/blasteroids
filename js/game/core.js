@@ -1,10 +1,36 @@
 /**
- * The core of the game stuff.
+ * Blasteroids!
+ *
+ * Created for January entry of One Game A Month
+ *
+ * Author: Mike Cluck
+ * Version: 1.0
+ *
+ *             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *                   Version 2, December 2004
+ *
+ * Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+ *
+ * Everyone is permitted to copy and distribute verbatim or modified
+ * copies of this license document, and changing it is allowed as long
+ * as the name is changed.
+ *
+ * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ * TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ *
+ * 0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
 var Game = (function($, undefined) {
 
     var
+
+    // The main Game instance
+    _game,
+
+    // The current players' score
+    score = 0,
+
     // The canvas element
     canvas = document.getElementById('canvas'),
 
@@ -45,12 +71,16 @@ var Game = (function($, undefined) {
     FPS = 40,
 
     // The actual game loop
-    gameLoop;
+    gameLoop,
+
+    // If true, the game is over (wait for an 'R' key press)
+    isGameOver = false;
 
     // Update all of the objects
     function update() {
-        if (paused)
+        if (isGameOver) {
             return;
+        }
 
         var delta = (new Date() - gameTime) / 1000;
         for (var id in gameObjects) {
@@ -70,12 +100,11 @@ var Game = (function($, undefined) {
         gameTime = new Date();
     }
 
-    var paused = false;
-
     // Draw all of the objects
     function draw() {
-        if (paused)
+        if (isGameOver) {
             return;
+        }
 
         context.fillStyle = CLEAR_COLOR;
         context.fillRect(0, 0, WIDTH, HEIGHT);
@@ -85,11 +114,20 @@ var Game = (function($, undefined) {
                 gameObjects[id].draw(context);
             }
         }
+
+        context.fillStyle = "#FFF";
+        context.font = "bold 14px 'Roboto Condensed',Arial,sans-serif";
+        context.fillText("Score: " + score, 24, 24);
     }
 
     // Capture the key events
     $(document).keydown(function(e) {
         keysPressed[e.which] = true;
+
+        if (isGameOver && e.which == KEYS.R) {
+            _game.resetGame();
+            isGameOver = false;
+        }
     });
 
     $(document).keyup(function(e) {
@@ -97,12 +135,16 @@ var Game = (function($, undefined) {
     });
 
     // Capture the mouse events
-    $(document).mousedown(function() {
-        mousePressed = true;
+    $(document).mousedown(function(e) {
+        if (e.which == 1) {
+            mousePressed = true;
+        }
     });
 
-    $(document).mouseup(function() {
-        mousePressed = false;
+    $(document).mouseup(function(e) {
+        if (e.which == 1) {
+            mousePressed = false;
+        }
     });
 
     $(document).mousemove(function(e) {
@@ -110,11 +152,30 @@ var Game = (function($, undefined) {
         mousePosition.y = e.clientY - TOP + $(window).scrollTop();
     });
 
-    return {
+    // Tell the user how to start the game
+    context.fillStyle = CLEAR_COLOR;
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+
+    context.fillStyle = "#F00";
+    context.font = "80px 'Droid Sans',Arial,sans-serif";
+    context.fillText("Blasteroids!", (WIDTH / 4) - 40, (HEIGHT / 4));
+
+    context.font = "30px 'Droid Sans',Arial,sans-serif";
+    context.fillText("Just like Asteroids!", (WIDTH / 3) - 10, (HEIGHT / 3));
+
+    context.font = "12px 'Droid Sans',Arial,sans-serif";
+    context.fillText("(without the physics, or spaceships or asteroids...)", (WIDTH / 3) - 20, (HEIGHT / 3) + 20);
+
+    context.fillStyle = "#FFF";
+    context.font = "40px 'Droid Sans',Arial,sans-serif";
+    context.fillText("Click to Start", (WIDTH / 2) - 110, (HEIGHT *.9));
+
+    _game = {
         /**
          * Initialize the game
          */
         init: function() {
+            clearInterval(gameLoop);
             QuadTree.init(WIDTH, HEIGHT);
             Game.addObject(new Enemy());
             Game.addObject(Player);
@@ -196,9 +257,35 @@ var Game = (function($, undefined) {
             return { x: WIDTH, y: HEIGHT };
         },
 
-        pause: function() {
-            paused = !paused;
+        addScore: function(x) {
+            x = x || 100;
+            score += x;
+        },
+
+        resetGame: function() {
+            for (var id in gameObjects) {
+                if (gameObjects.hasOwnProperty(id) && gameObjects[id] instanceof GameObject) {
+                    _game.removeObject(gameObjects[id]);
+                }
+            }
+
+            gameObjects = {};
+            _game.init();
+        },
+
+        gameOver: function() {
+            isGameOver = true;
+            _game.stop();
+
+            context.fillStyle = "#FFF";
+            context.font = "80px 'Droid Sans',Arial,sans-serif";
+            context.fillText("Game Over!", (WIDTH / 4) - 40, (HEIGHT / 4));
+
+            context.font = "30px 'Droid Sans',Arial,sans-serif";
+            context.fillText("Press R to restart", (WIDTH / 2) - 110, (HEIGHT *.9));
         }
-    }
+    };
+
+    return _game;
 
 })(jQuery);

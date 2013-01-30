@@ -127,7 +127,9 @@ var Player = (function(Game, undefined) {
      */
     _player.update = function(delta) {
         if (QuadTree.getCollisions(_player).length > 0) {
-            restart();
+            Game.gameOver();
+            _player.x = 300;
+            _player.y = 200;
         }
 
         // Find out if the player shot an enemy
@@ -155,6 +157,9 @@ var Player = (function(Game, undefined) {
                 };
 
                 Game.removeObject(collision);
+
+                Game.addScore();
+
                 Game.addObject(new Enemy());
 
                 // Give a random chance of the wave ending quicker
