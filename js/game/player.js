@@ -126,6 +126,19 @@ var Player = (function(Game, undefined) {
      * Define how the player moves
      */
     _player.update = function(delta) {
+        // Make sure the player can wrap around the screen
+        if (_player.x > CANVAS_SIZE.x) {
+            _player.x = -_player.size.width + 1;
+        } else if (_player.x + _player.size.width < 0) {
+            _player.x = CANVAS_SIZE.x - 1;
+        }
+
+        if (_player.y > CANVAS_SIZE.y) {
+            _player.y = -_player.size.height + 1;
+        } else if (_player.x + _player.size.height < 0) {
+            _player.y = CANVAS_SIZE.y - 1;
+        }
+
         if (QuadTree.getCollisions(_player).length > 0) {
             Game.gameOver();
             _player.x = 300;
