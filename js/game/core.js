@@ -176,6 +176,7 @@ var Game = (function($, undefined) {
          */
         init: function() {
             clearInterval(gameLoop);
+			score = 0;
             QuadTree.init(WIDTH, HEIGHT);
             Game.addObject(new Enemy());
             Game.addObject(Player);
